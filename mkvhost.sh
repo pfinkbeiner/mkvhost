@@ -7,11 +7,12 @@
 # Should be executed with sudo privileges.
 
 USER=patrickfinkbeiner
-HOSTS_PATH=/etc/hosts
 VHOSTS_PATH=/etc/apache2/extra/httpd-vhosts.conf
 DOCUMENT_ROOT=/Users/$USER/development
+CONTEXT=Development
 
-# Variables you might wont change.
+# Variables that you might not want to change.
+HOSTS_PATH=/etc/hosts
 ERROR_LOG_PATH=/private/var/log/apache2
 ACCESS_LOG_PATH=/private/var/log/apache2
 
@@ -51,7 +52,7 @@ echo "
 	DocumentRoot \"$DOCUMENT_ROOT/$projectName/htdocs\"
 	ServerName $projectName.local
 	ServerAlias www.$projectName.local
-	SetEnv CONTEXT Development
+	SetEnv CONTEXT $CONTEXT
 	ErrorLog \"$ERROR_LOG_PATH/$projectName-error_log\"
 	CustomLog \"$ACCESS_LOG_PATH/$projectName-access_log\" common
 </VirtualHost>" >> $VHOSTS_PATH
@@ -77,7 +78,6 @@ restartApache() {
 }
 
 initialize() {
-	sudo -v
 	echo "
 	The bash script will patch several files: 
 	1. $HOSTS_PATH
