@@ -1,53 +1,90 @@
 #!/bin/bash
 
-# Might as well ask for password up-front, right?
-sudo -v
+# Little helper script for fast vhost creation.
+# Written for own development enviroment. Based on OSX Mountain Lion
+# standard apache installation. No guarantee that it also fits your needs. 
 
+# Should be executed with sudo privileges.
+
+USER=patrickfinkbeiner
 HOSTS_PATH=/etc/hosts
-HOST_USER=pd
-vHOSTS_PATH=/etc/apache2/extra/httpd-vhosts.conf
-PROJECTS_PATH=/Users/patrickfinkbeiner/development
+VHOSTS_PATH=/etc/apache2/extra/httpd-vhosts.conf
+DOCUMENT_ROOT=/Users/$USER/development
 
-echo "
-The bash script will patch several files: 
-1. /etc/hosts
-2. /etc/apache/extra/httpd-vhost.conf
+# Variables you might wont change.
+ERROR_LOG_PATH=/private/var/log/apache2
+ACCESS_LOG_PATH=/private/var/log/apache2
 
-Also create some directories, fix permissions and finally restarts apache2.
-"
-
-echo "Please select an unique title for your new project: "
-read projectName
-
-if [ -d "$PROJECTS_PATH/$projectName" ]
+# Check if given project name is already in use.
+doesProjectAlreadyExist() {
+	if [ -d "$DOCUMENT_ROOT/$projectName" ]
 	then
-		echo "WARNING: Project already exist! EXIT!"
+		echo "WARNING: Project already exist! At least its directory."
+		chooseTitle
 		exit
-fi
+	else
+		echo "Okay, project » $projectName « will be created…"
+		patchHosts
+	fi
+}
 
-#Patch hosts file
+# Choose a title for your new project.
+chooseTitle() {
+	echo "Please select an unique title for your new project: "
+	read projectName
+	doesProjectAlreadyExist
+}
+
+##Patch hosts file
+patchHosts() {
 echo "
 127.0.0.1 	$projectName.local
 127.0.0.1 	www.$projectName.local" >> $HOSTS_PATH
+createVhost
+}
 
-#Patch virtualHosts
+# Actually add new VirtualHost.
+createVhost() {
 echo "
 <VirtualHost *:80>
-	ServerAdmin $HOST_USER@localhost
-	DocumentRoot \"$PROJECTS_PATH/$projectName/htdocs\"
+	ServerAdmin $USER@$(hostname)
+	DocumentRoot \"$DOCUMENT_ROOT/$projectName/htdocs\"
 	ServerName $projectName.local
 	ServerAlias www.$projectName.local
 	SetEnv CONTEXT Development
-	ErrorLog \"/private/var/log/apache2/$projectName-error_log\"
-	CustomLog \"/private/var/log/apache2/$projectName-access_log\" common
-</VirtualHost>" >> $vHOSTS_PATH
+	ErrorLog \"$ERROR_LOG_PATH/$projectName-error_log\"
+	CustomLog \"$ACCESS_LOG_PATH/$projectName-access_log\" common
+</VirtualHost>" >> $VHOSTS_PATH
+createDir
+}
 
+# Create directory. Add additional folder names if needed.
+createDir() {
+	mkdir -p $DOCUMENT_ROOT/$projectName/htdocs
+	fixPermissions
+}
 
-mkdir -p $PROJECTS_PATH/$projectName/htdocs
+##Fix permissions
+fixPermissions() {
+	sudo chown -R _www:admin $DOCUMENT_ROOT/$projectName
+	sudo chmod -R g+rwx $DOCUMENT_ROOT/$projectName
+	restartApache
+}
 
-#Fix permissions
-sudo chown -R _www:admin $PROJECTS_PATH/$projectName/
-sudo chmod -R g+rwx $PROJECTS_PATH/$projectName/
+restartApache() {
+	sudo apachectl restart
+	echo "Ready! Project was successfully created and your ready to go!"
+}
 
-sudo apachectl restart
-echo "Finish! Project was successfully created."
+initialize() {
+	sudo -v
+	echo "
+	The bash script will patch several files: 
+	1. $HOSTS_PATH
+	2. $VHOSTS_PATH
+
+	Also create some directories, fix permissions and finally restarts apache2.
+	"
+	chooseTitle
+}
+initialize
