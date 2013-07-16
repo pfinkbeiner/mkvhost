@@ -1,11 +1,11 @@
-# MkVhost – litte bash script for fast & easy creating vhost on your Mac.
+# MkVhost – litte bash script for fast & easy creating vhosts on your Mac.
 
 ### Problem to solve
 
-Tired of creating vhosts over and over again? Yep, me to!
+Tired of creating vhosts over and over again? Yep, me too!
 ___
 
-### Configure
+### Usage
 * Get the latest version.
 * Adjust variables for your own development enviroment.
 * Save time…
