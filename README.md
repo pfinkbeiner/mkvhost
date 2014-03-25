@@ -23,4 +23,4 @@ This script contains seven variables you can change. You may dont want to change
 
 ### Hint
 
-Locate the script wherever you want. In my case its located in `~/.bin/mkvhost/mkvhost.sh`. For easy access i created an alias in my .bashrc like `alias="sudo ~/.bin/mkvhost/mkvhost.sh"`. You see i added a sudo inside the alias. _You'll need sudo privileges to run the script._
+Locate the script wherever you want. In my case its located in `~/.bin/mkvhost/mkvhost.sh`. For easy access i created an alias in my .bashrc like `alias mkvhost="sudo ~/.bin/mkvhost/mkvhost.sh"`. You see i added a sudo inside the alias. _You'll need sudo privileges to run the script._
